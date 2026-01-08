@@ -2,36 +2,36 @@ window.StockApp = window.StockApp || {};
 
 // Massive List of Real IHSG Tickers
 const STOCK_DB = [
-    { code: 'BBCA', sector: 'Banking', name: 'Bank Central Asia', owner: 'Jardine Hartono (55%), Public (45%)', basePrice: 8150 },
-    { code: 'BBRI', sector: 'Banking', name: 'Bank Rakyat Indonesia', owner: 'Negara RI (53%), Public (47%)', basePrice: 3700 },
-    { code: 'BMRI', sector: 'Banking', name: 'Bank Mandiri', owner: 'Negara RI (52%), Public (48%)', basePrice: 4810 },
-    { code: 'BBNI', sector: 'Banking', name: 'Bank Negara Indonesia', owner: 'Negara RI (60%), Public (40%)', basePrice: 4200 },
+    { code: 'BBCA', sector: 'Banking', name: 'Bank Central Asia', owner: 'Jardine Hartono (55%), Public (45%)', basePrice: 10150 },
+    { code: 'BBRI', sector: 'Banking', name: 'Bank Rakyat Indonesia', owner: 'Negara RI (53%), Public (47%)', basePrice: 5400 },
+    { code: 'BMRI', sector: 'Banking', name: 'Bank Mandiri', owner: 'Negara RI (52%), Public (48%)', basePrice: 6500 },
+    { code: 'BBNI', sector: 'Banking', name: 'Bank Negara Indonesia', owner: 'Negara RI (60%), Public (40%)', basePrice: 5350 },
     { code: 'BRIS', sector: 'Banking', name: 'Bank Syariah Indonesia', owner: 'Bank Mandiri (51%), BNI (23%), BRI (15%)', basePrice: 2450 },
-    { code: 'ARTO', sector: 'Banking', name: 'Bank Jago (Digital)', owner: 'Metamorfosis Ekosistem (29%), Gojek (21%)', basePrice: 2100 },
-    { code: 'ADRO', sector: 'Mining-Coal', name: 'Adaro Energy', owner: 'Garibaldi Thohir (6%), Public (94%)', basePrice: 2010 },
+    { code: 'ARTO', sector: 'Banking', name: 'Bank Jago (Digital)', owner: 'Metamorfosis Ekosistem (29%), Gojek (21%)', basePrice: 2800 },
+    { code: 'ADRO', sector: 'Mining-Coal', name: 'Adaro Energy', owner: 'Garibaldi Thohir (6%), Public (94%)', basePrice: 3800 },
     { code: 'PTBA', sector: 'Mining-Coal', name: 'Bukit Asam', owner: 'MIND ID (65%), Public (35%)', basePrice: 2600 },
     { code: 'ITMG', sector: 'Mining-Coal', name: 'Indo Tambangraya Megah', owner: 'Banpu Minerals (65%), Public (35%)', basePrice: 24000 },
     { code: 'BUMI', sector: 'Mining-Coal', name: 'Bumi Resources', owner: 'Bakrie Group & Salim Group Consortium', basePrice: 120 },
     { code: 'ANTM', sector: 'Mining-Gold', name: 'Aneka Tambang', owner: 'MIND ID (65%), Public (35%)', basePrice: 1600 },
     { code: 'MDKA', sector: 'Mining-Gold', name: 'Merdeka Copper Gold', owner: 'Saratoga (18%), Mitra Daya (13%)', basePrice: 2500 },
-    { code: 'AMMN', sector: 'Mining-Gold', name: 'Amman Mineral', owner: 'Medco Energi & Salim Group', basePrice: 11500 },
-    { code: 'INCO', sector: 'Mining-Nickel', name: 'Vale Indonesia', owner: 'Vale Canada (43%), MIND ID (20%)', basePrice: 3900 },
-    { code: 'NCKL', sector: 'Mining-Nickel', name: 'Trimegah Bangun Persada', owner: 'Harita Group (80%), Public (20%)', basePrice: 900 },
+    { code: 'AMMN', sector: 'Mining-Gold', name: 'Amman Mineral', owner: 'Medco Energi & Salim Group', basePrice: 12000 },
+    { code: 'INCO', sector: 'Mining-Nickel', name: 'Vale Indonesia', owner: 'Vale Canada (43%), MIND ID (20%)', basePrice: 4100 },
+    { code: 'NCKL', sector: 'Mining-Nickel', name: 'Trimegah Bangun Persada', owner: 'Harita Group (80%), Public (20%)', basePrice: 950 },
     { code: 'CTRA', sector: 'Property', name: 'Ciputra Development', owner: 'Kel. Ciputra (52%), Public (48%)', basePrice: 1300 },
     { code: 'SMRA', sector: 'Property', name: 'Summarecon Agung', owner: 'Kel. Soetjipto (58%), Public (42%)', basePrice: 650 },
     { code: 'BSDE', sector: 'Property', name: 'Bumi Serpong Damai', owner: 'Sinarmas Land (60%), Public (40%)', basePrice: 1050 },
     { code: 'PWON', sector: 'Property', name: 'Pakuwon Jati', owner: 'Pakuwon Arthaniaga (68%), Public (32%)', basePrice: 420 },
-    { code: 'BREN', sector: 'IPO', name: 'Barito Renewables', owner: 'Barito Pacific (66%), Green Era (24%)', basePrice: 8500 },
+    { code: 'BREN', sector: 'IPO', name: 'Barito Renewables', owner: 'Barito Pacific (66%), Green Era (24%)', basePrice: 11000 },
     { code: 'BRAND', sector: 'IPO', name: 'Brand Brand (Fictional IPO)', owner: 'Unknown Founders (70%), Public (30%)', basePrice: 300 },
     { code: 'STRK', sector: 'Small Cap', name: 'Lovina Beach', owner: 'Baruna Bina (78%), Public (22%)', basePrice: 50 },
     { code: 'FUTR', sector: 'Small Cap', name: 'Liofil Foods', owner: 'Asia Future (60%), Public (40%)', basePrice: 50 },
     { code: 'KOKA', sector: 'Small Cap', name: 'Koka Indonesia', owner: 'Chiqo (75%), Public (25%)', basePrice: 65 },
     { code: 'WIFI', sector: 'Small Cap', name: 'Solusi Sinergi', owner: 'Investasi Gemilang (55%), Public (45%)', basePrice: 145 },
     { code: 'ICBP', sector: 'Consumer', name: 'Indofood CBP', owner: 'Indofood Sukses Makmur (80%)', basePrice: 10500 },
-    { code: 'UNVR', sector: 'Consumer', name: 'Unilever Indonesia', owner: 'Unilever Indonesia Holding (85%)', basePrice: 2600 },
-    { code: 'TLKM', sector: 'Telco', name: 'Telkom Indonesia', owner: 'Negara RI (52%), Public (48%)', basePrice: 3540 },
-    { code: 'ISAT', sector: 'Telco', name: 'Indosat Ooredoo', owner: 'Ooredoo Hutchison (65%), Public (35%)', basePrice: 10200 },
-    { code: 'ASII', sector: 'Auto', name: 'Astra International', owner: 'Jardine cycle & Carriage (50%)', basePrice: 7025 }
+    { code: 'UNVR', sector: 'Consumer', name: 'Unilever Indonesia', owner: 'Unilever Indonesia Holding (85%)', basePrice: 2800 },
+    { code: 'TLKM', sector: 'Telco', name: 'Telkom Indonesia', owner: 'Negara RI (52%), Public (48%)', basePrice: 3100 },
+    { code: 'ISAT', sector: 'Telco', name: 'Indosat Ooredoo', owner: 'Ooredoo Hutchison (65%), Public (35%)', basePrice: 11500 },
+    { code: 'ASII', sector: 'Auto', name: 'Astra International', owner: 'Jardine cycle & Carriage (50%)', basePrice: 5200 }
 ];
 
 const TEMPLATES = [
@@ -56,10 +56,24 @@ const TEMPLATES = [
 StockApp.Data = {
 
     async fetchAllNews() {
-        // Try fetch real prices first
-        await this.syncLivePrices();
-
         let allNews = [];
+
+        // 1. Try to load External Real-Time Price Data
+        try {
+            const externalData = await fetch('js/stock_data.json').then(r => r.json()).catch(() => null);
+            if (externalData) {
+                console.log("Using External Price Data:", externalData);
+                // Update STOCK_DB with real prices
+                STOCK_DB.forEach(stock => {
+                    if (externalData[stock.code]) {
+                        stock.basePrice = externalData[stock.code].price;
+                        stock.lastUpdated = externalData[stock.code].last_updated;
+                    }
+                });
+            }
+        } catch (e) {
+            console.log("Using default hardcoded prices.");
+        }
 
         try {
             const raw = await fetch('https://berita-indo-api-mirror.vercel.app/v1/cnbc-news/market').then(r => r.json()).catch(() => null);
@@ -162,74 +176,5 @@ StockApp.Data = {
             sector: stock.sector,
             code: stock.code
         };
-    },
-
-    // =========================================
-    // ROBUST 3-STEP REAL-TIME SYNC
-    // =========================================
-    async syncLivePrices() {
-        console.log("Starting 3-Step Price Sync...");
-
-        // STEP 1: Try IDX API (Primary)
-        if (await this.tryFetchIDX()) {
-            console.log("✅ Step 1 Success: Synced with IDX.");
-            return;
-        }
-
-        // STEP 2: Try Google Finance (Secondary - via Proxy)
-        if (await this.tryFetchGoogle()) {
-            console.log("✅ Step 2 Success: Synced with Google Finance.");
-            return;
-        }
-
-        // STEP 3: Fallback to Gemini AI Mode (Internal DB)
-        this.useGeminiFallback();
-    },
-
-    async tryFetchIDX() {
-        console.log("Step 1: Attempting IDX Fetch...");
-        try {
-            const proxyUrl = 'https://api.allorigins.win/raw?url=';
-            const targetUrl = encodeURIComponent('https://www.idx.co.id/primary/TradingSummary/GetStockSummary?length=9999&start=0');
-            const response = await fetch(proxyUrl + targetUrl);
-
-            if (!response.ok) throw new Error("Network/Proxy Error");
-
-            const data = await response.json();
-            if (!data || !data.data || data.data.length === 0) throw new Error("Empty Data");
-
-            let updatedCount = 0;
-            data.data.forEach(realStock => {
-                const localStock = STOCK_DB.find(s => s.code === realStock.StockCode);
-                if (localStock) {
-                    localStock.basePrice = realStock.LastPrice;
-                    updatedCount++;
-                }
-            });
-            return updatedCount > 0;
-
-        } catch (e) {
-            console.warn("❌ Step 1 Failed (IDX):", e.message);
-            return false;
-        }
-    },
-
-    async tryFetchGoogle() {
-        console.log("Step 2: Attempting Google Finance (Mock/Proxy)...");
-        try {
-            // Simulated check as direct Google Scraping is blocked client-side
-            await new Promise(r => setTimeout(r, 500));
-            throw new Error("Generic Fallback");
-        } catch (e) {
-            console.warn("❌ Step 2 Failed (Google):", e.message);
-            return false;
-        }
-    },
-
-    useGeminiFallback() {
-        console.log("⚠️ Step 3: Using Gemini AI Fallback Mode");
-        console.log("Using High-Accuracy Internal Database (Calibrated Jan 2026)");
-    }
-};
     }
 };
