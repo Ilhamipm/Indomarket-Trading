@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndoMarket News AI | Real-time Analysis</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/robot.css">
+
+    <!-- Icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <h1><i class='bx bx-news'></i> INDOMARKET <span class="text-primary">AI NEWS</span></h1>
+            </div>
+            <div class="status-bar">
+                <div class="status-item"><i class='bx bx-broadcast'></i> LIVE FEED</div>
+                <div class="status-item text-primary"><i class='bx bx-refresh'></i> Auto-Update: 5 Mins</div>
+                <div class="status-item"><i class='bx bx-time'></i> <span id="clock" class="font-mono">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Ticker Tape -->
+        <div class="ticker-wrap">
+            <div class="ticker" id="ticker-content">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Search / Filter -->
+        <div class="search-bar-container">
+            <div class="search-wrapper">
+                <i class='bx bx-search'></i>
+                <input type="text" id="search-input" placeholder="Search Ticker (e.g., ADRO, BSDE)...">
+            </div>
+
+            <!-- Category Filters -->
+            <div class="filter-wrapper">
+                <button class="filter-btn active" onclick="filterSource('all')">All Market</button>
+                <button class="filter-btn text-warning" onclick="filterSource('1H')"
+                    style="border-color: var(--warning);"><i class='bx bx-timer'></i> 1 Jam Terakhir</button>
+
+                <div class="filter-group-label"><i class='bx bx-coin-stack'></i> BANKING:</div>
+                <button class="filter-btn" onclick="filterSource('Banking')">Banks</button>
+
+                <div class="filter-group-label"><i class='bx bx-hard-hat'></i> MINING:</div>
+                <button class="filter-btn" onclick="filterSource('Mining-Coal')">Coal</button>
+                <button class="filter-btn" onclick="filterSource('Mining-Gold')">Gold</button>
+                <button class="filter-btn" onclick="filterSource('Mining-Nickel')">Nickel</button>
+
+                <div class="filter-group-label"><i class='bx bx-buildings'></i> SECTORS:</div>
+                <button class="filter-btn" onclick="filterSource('Property')">Property</button>
+                <button class="filter-btn" onclick="filterSource('Consumer')">Consumer</button>
+
+                <div class="filter-group-label"><i class='bx bx-rocket'></i> HOT:</div>
+                <button class="filter-btn" onclick="filterSource('IPO')">IPO</button>
+                <button class="filter-btn" onclick="filterSource('Small Cap')">Small Cap</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Main Feed (Now 2 Columns via CSS) -->
+            <main class="news-feed-section">
+                <div class="section-header">
+                    <h2>Latest Market News</h2>
+                    <div class="live-indicator">
+                        <span class="pulsing-dot"></span> Real-time
+                    </div>
+                </div>
+
+                <div id="news-container" class="news-grid">
+                    <div class="loading-state">
+                        <i class='bx bx-loader-alt bx-spin'></i> Aggregating Data...
+                    </div>
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+
+                <!-- Trading Robot Card -->
+                <div class="card robot-card">
+                    <div class="card-title" style="color:var(--primary); display:flex; align-items:center; gap:8px;">
+                        <i class='bx bx-bot'></i> AI TRADING ROBOT
+                    </div>
+                    <div id="trading-robot-list" class="robot-grid">
+                        <!-- Injected via JS -->
+                    </div>
+                    <small
+                        style="display:block; margin-top:10px; color:var(--text-muted); font-size:10px; text-align:center;">
+                        *Prediction for Tomorrow's Market Open
+                    </small>
+                </div>
+
+                <!-- Expanded Watchlist -->
+                <div class="card watchlist-card">
+                    <div class="card-title text-success"><i class='bx bx-line-chart'></i> WATCHLIST BESOK</div>
+                    <div id="tomorrow-watchlist" class="watchlist-grid">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Removed Sentiment Gauge as requested -->
+
+                <div class="card">
+                    <div class="card-title">Top 🔔 BUY Signals</div>
+                    <div id="top-buy-list" class="mini-list"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Top ⚠️ SELL Signals</div>
+                    <div id="top-sell-list" class="mini-list"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Analysis Modal -->
+    <div class="modal-overlay" id="analysis-modal">
+        <div class="modal-content news-modal">
+            <div class="modal-header">
+                <div class="modal-stock-info">
+                    <div class="modal-badge" id="modal-sentiment-badge">STRONG BUY</div>
+                    <h2 id="modal-title">Laba BBCA Naik Significance</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal()"><i class='bx bx-x'></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-main-col">
+                    <p class="modal-date" id="modal-date">Updated: Today, 14:00</p>
+                    <p class="modal-summary" id="modal-summary">Full summary text...</p>
+
+                    <div class="ai-insight-box">
+                        <h3><i class='bx bx-brain'></i> AI Impact Analysis</h3>
+                        <p id="modal-reason">This news is positive because...</p>
+                    </div>
+
+                    <a href="#" id="modal-source-link" target="_blank" class="read-more-btn">
+                        Read Full Article Source <i class='bx bx-link-external'></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data-service.js"></script>
+    <script src="js/analysis.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
