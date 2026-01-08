@@ -143,33 +143,39 @@ StockApp.Analysis = {
 
                 if (type === 'NEUTRAL') return null; // Filter out noise
 
-                // 4. Simulate Price Targets (Realistic Logic)
-                // Retrieve basePrice from global STOCK_DB if possible, or fallback
+                // 4. Retrieve REAL Price (Strict)
+                // We depend on STOCK_DB having been updated or look at a global lookup if needed.
+                // Best way: Lookup in STOCK_DB because DataService updates it.
                 const dbStock = STOCK_DB.find(s => s.code === stock.code);
-                const basePrice = dbStock ? dbStock.basePrice : (500 + Math.floor(Math.random() * 4500));
 
-                // Add slight volatility (±1-2%) to simulate "Current Live Price"
-                const volatility = (Math.random() * 0.04) - 0.02;
-                const currentPrice = Math.floor(basePrice * (1 + volatility));
+                let currentPrice = null;
 
-                let entry, tp, sl;
+                // Priority: Real Data > Base Price fallback
+                if (dbStock && dbStock.lastUpdated) {
+                    currentPrice = dbStock.basePrice; // This is now the REAL EXACT price
+                }
 
-                // Rounding helper
-                const roundPrice = (p) => {
-                    if (p < 500) return Math.round(p); // Fraksi 1
-                    if (p < 5000) return Math.round(p / 10) * 10; // Fraksi 10
-                    return Math.round(p / 25) * 25; // Fraksi 25 (Standard tick)
-                };
+                let entry = '_', tp = '_', sl = '_';
 
-                if (type === 'BULLISH') {
-                    entry = roundPrice(currentPrice);
-                    tp = roundPrice(currentPrice * (1 + (0.04 + Math.random() * 0.08))); // +4% to +12%
-                    sl = roundPrice(currentPrice * (1 - (0.02 + Math.random() * 0.04))); // -2% to -6%
-                } else {
-                    // Short Sell / Exit Strategy
-                    entry = roundPrice(currentPrice);
-                    tp = roundPrice(currentPrice * (1 - (0.04 + Math.random() * 0.08))); // Lower target
-                    sl = roundPrice(currentPrice * (1 + (0.02 + Math.random() * 0.04))); // Stop if rises
+                if (currentPrice) {
+                    // Start from exact price
+                    // We only round for TP/SL calculation purposes, but Entry matches market
+                    const roundPrice = (p) => {
+                        if (p < 500) return Math.round(p);
+                        if (p < 5000) return Math.round(p / 10) * 10;
+                        return Math.round(p / 25) * 25;
+                    };
+
+                    entry = currentPrice; // EXACT PRICE
+
+                    if (type === 'BULLISH') {
+                        tp = roundPrice(currentPrice * (1 + (0.04 + Math.random() * 0.04))); // +4% to +8%
+                        sl = roundPrice(currentPrice * (1 - (0.02 + Math.random() * 0.02))); // -2% to -4%
+                    } else {
+                        // Short Sell logic
+                        tp = roundPrice(currentPrice * (1 - (0.04 + Math.random() * 0.04)));
+                        sl = roundPrice(currentPrice * (1 + (0.02 + Math.random() * 0.02)));
+                    }
                 }
 
                 return {
@@ -177,7 +183,7 @@ StockApp.Analysis = {
                     action: action,
                     type: type, // BULLISH / BEARISH
                     score: stock.score,
-                    entry: entry,
+                    entry: entry, // Can be '_' if no price
                     tp: tp,
                     sl: sl,
                     reason: `Accumulated Sentiment: ${stock.score > 0 ? '+' : ''}${stock.score} from ${stock.mentions} sources.`

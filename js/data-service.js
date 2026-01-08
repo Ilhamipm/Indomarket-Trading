@@ -31,7 +31,9 @@ const STOCK_DB = [
     { code: 'UNVR', sector: 'Consumer', name: 'PT Unilever Indonesia Tbk', owner: 'Unilever Indonesia Holding (85%)', basePrice: 2800 },
     { code: 'TLKM', sector: 'Telco', name: 'PT Telkom Indonesia (Persero) Tbk', owner: 'Negara RI (52%), Public (48%)', basePrice: 3100 },
     { code: 'ISAT', sector: 'Telco', name: 'PT Indosat Ooredoo Hutchison Tbk', owner: 'Ooredoo Hutchison (65%), Public (35%)', basePrice: 11500 },
-    { code: 'ASII', sector: 'Auto', name: 'PT Astra International Tbk', owner: 'Jardine cycle & Carriage (50%)', basePrice: 5200 }
+    { code: 'ASII', sector: 'Auto', name: 'PT Astra International Tbk', owner: 'Jardine cycle & Carriage (50%)', basePrice: 5200 },
+    { code: 'GOTO', sector: 'Tech', name: 'PT GoTo Gojek Tokopedia Tbk', owner: 'GOTO Peopleverse (5%), Taobao (8%)', basePrice: 50 },
+    { code: 'KLBF', sector: 'Consumer', name: 'PT Kalbe Farma Tbk', owner: 'Sapta (14%), Public (86%)', basePrice: 1500 }
 ];
 
 const TEMPLATES = [
@@ -58,21 +60,17 @@ StockApp.Data = {
     async fetchAllNews() {
         let allNews = [];
 
-        // 1. Try to load External Real-Time Price Data
-        try {
-            const externalData = await fetch('js/stock_data.json').then(r => r.json()).catch(() => null);
-            if (externalData) {
-                console.log("Using External Price Data:", externalData);
-                // Update STOCK_DB with real prices
-                STOCK_DB.forEach(stock => {
-                    if (externalData[stock.code]) {
-                        stock.basePrice = externalData[stock.code].price;
-                        stock.lastUpdated = externalData[stock.code].last_updated;
-                    }
-                });
-            }
-        } catch (e) {
-            console.log("Using default hardcoded prices.");
+        // 1. Load Real-Time Price Data (from global window.STOCK_DATA)
+        if (window.STOCK_DATA) {
+            console.log("Using Global JS Price Data");
+            STOCK_DB.forEach(stock => {
+                if (window.STOCK_DATA[stock.code]) {
+                    stock.basePrice = window.STOCK_DATA[stock.code].price;
+                    stock.lastUpdated = window.STOCK_DATA[stock.code].last_updated;
+                }
+            });
+        } else {
+            console.log("No global price data found. Using default hardcoded prices.");
         }
 
         try {
