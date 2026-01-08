@@ -60,6 +60,16 @@ StockApp.Data = {
     async fetchAllNews() {
         let allNews = [];
 
+        // 0. Use Global News Data (Real Automation)
+        if (window.MARKET_NEWS && Array.isArray(window.MARKET_NEWS)) {
+            console.log("Using Global JS News Data", window.MARKET_NEWS);
+            // Ensure dates are Date objects
+            allNews = window.MARKET_NEWS.map(n => ({
+                ...n,
+                date: new Date(n.date)
+            }));
+        }
+
         // 1. Load Real-Time Price Data (from global window.STOCK_DATA)
         if (window.STOCK_DATA) {
             console.log("Using Global JS Price Data");
@@ -73,10 +83,13 @@ StockApp.Data = {
             console.log("No global price data found. Using default hardcoded prices.");
         }
 
+        // If we have real news, use it. Try external API only if we want MORE news, or skip.
+        // For now, let's Append external API news if available (CNBC) but Prioritize our managed list.
+
         try {
             const raw = await fetch('https://berita-indo-api-mirror.vercel.app/v1/cnbc-news/market').then(r => r.json()).catch(() => null);
             if (raw && raw.data) {
-                allNews = raw.data.map(item => ({
+                const cnbcItems = raw.data.map(item => ({
                     source: 'CNBC Indonesia',
                     title: item.title,
                     link: item.link,
@@ -84,22 +97,24 @@ StockApp.Data = {
                     summary: item.contentSnippet || '',
                     sector: 'bluechip'
                 }));
+                allNews = [...allNews, ...cnbcItems];
             }
         } catch (e) { }
 
-        // Generate Synthetic News
-        const generatedCount = 60;
-        const syntheticNews = Array.from({ length: generatedCount }).map(() => this.generateArticle());
+        // Generate Synthetic only if we have very little data (fallback)
+        if (allNews.length < 5) {
+            const generatedCount = 20;
+            const syntheticNews = Array.from({ length: generatedCount }).map(() => this.generateArticle());
+            allNews = [...allNews, ...syntheticNews];
+        }
 
         // Strict 7 Day Filter
         const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
         const now = new Date();
         const minDate = new Date(now.getTime() - ONE_WEEK_MS);
 
-        let combined = [...syntheticNews, ...allNews];
-
         // Filter out old news
-        combined = combined.filter(n => new Date(n.date) >= minDate);
+        let combined = allNews.filter(n => new Date(n.date) >= minDate);
 
         // Sort new to old
         return combined.sort((a, b) => b.date - a.date);

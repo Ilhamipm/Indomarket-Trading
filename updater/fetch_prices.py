@@ -51,10 +51,12 @@ def update_prices():
     # Path to the output JS file (Avoiding JSON fetch for CORS compatibility)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     output_path = os.path.join(base_dir, '..', 'js', 'stock_data.js')
+    news_output_path = os.path.join(base_dir, '..', 'js', 'news_data.js')
 
     data_to_save = {}
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # 1. Update Prices
     for code, price in REAL_PRICES.items():
         data_to_save[code] = {
             "price": price,
@@ -64,14 +66,66 @@ def update_prices():
     # Ensure/Create directory
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Write as a JavaScript file
+    # Write Prices JS
     js_content = f"window.STOCK_DATA = {json.dumps(data_to_save, indent=4)};"
-
     with open(output_path, 'w') as f:
         f.write(js_content)
     
     print(f"Successfully updated prices for {len(data_to_save)} stocks.")
-    print(f"Saved to: {output_path}")
+
+    # 2. Fetch News (RSS)
+    print("Fetching News...")
+    import urllib.request
+    import xml.etree.ElementTree as ET
+    import time
+
+    news_list = []
+    
+    # Select a few active tickers to check for news to avoid spamming requests
+    tickers_to_check = ["BBCA", "BBRI", "BMRI", "BBNI", "ADRO", "ASII", "GOTO", "TLKM", "ANTM", "AMMN"]
+    
+    for code in tickers_to_check:
+        try:
+            # Google News RSS Search
+            url = f"https://news.google.com/rss/search?q={code}+saham+indonesia+when:7d&hl=id&gl=ID&ceid=ID:id"
+            with urllib.request.urlopen(url) as response:
+                xml_data = response.read()
+                root = ET.fromstring(xml_data)
+                
+                # Get first 2 items per ticker
+                count = 0
+                for item in root.findall('.//item'):
+                    if count >= 2: break
+                    
+                    title = item.find('title').text
+                    link = item.find('link').text
+                    pubDate = item.find('pubDate').text
+                    
+                    # Simple Clean
+                    title = title.split(' - ')[0] # Remove source suffix if common
+                    
+                    news_list.append({
+                        "source": "Google News",
+                        "title": title,
+                        "link": link,
+                        "date": pubDate,
+                        "summary": f"Berita terbaru mengenai saham {code}.",
+                        "code": code,
+                        "sector": "Market" # Simplified
+                    })
+                    count += 1
+            
+            time.sleep(1) # Polite delay
+        except Exception as e:
+            print(f"Error fetching {code}: {e}")
+
+    # Write News JS
+    news_js_content = f"window.MARKET_NEWS = {json.dumps(news_list, indent=4)};"
+    with open(news_output_path, 'w', encoding='utf-8') as f:
+        f.write(news_js_content)
+
+    print(f"Successfully updated news with {len(news_list)} articles.")
+
 
 if __name__ == "__main__":
     update_prices()
