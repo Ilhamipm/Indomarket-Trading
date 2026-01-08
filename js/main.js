@@ -158,194 +158,66 @@ function renderFeed(newsList) {
         if (horizon.type === 'SHORT') horizonClass = 'short';
         if (horizon.type === 'LONG') horizonClass = 'long';
 
+        // Prepare Detailed Data
+        const stockInfo = Data.lookupStock(item.title) || Data.lookupStock(item.code) || { owner: 'Data Not Available' };
+        const technical = item.sentiment.technical || {};
+        const fundamental = item.sentiment.fundamental || {};
+
         return `
-        <article class="news-card ${freshClass}" onclick="openAnalysis('${encodeURIComponent(item.title).replace(/'/g, "%27")}', event)">
+        <article class="news-card ${freshClass}">
             <div class="news-content">
                 <div class="news-meta">
                     <span class="news-source">${item.source}</span>
                     <span class="news-date">${formatDateID(item.date)}</span>
                 </div>
+                
                 <h3 class="news-title">
                     ${newTag}
-                    <a href="#">${item.title}</a>
+                    ${item.title}
                 </h3>
-                <div class="news-footer">
-                    <span class="sentiment-badge ${badgeClass}">${item.sentiment.action}</span>
-                    <span class="horizon-tag ${horizonClass}"><i class='bx ${horizon.icon}'></i> ${horizon.label}</span>
+
+                <div class="owner-banner inline-banner">
+                    <i class='bx bx-id-card'></i> <strong>OWNER:</strong> ${stockInfo.owner}
                 </div>
+
+                <p class="news-summary">${item.summary}</p>
+                
+                <div class="analysis-grid inline-grid">
+                    <div class="analysis-col">
+                        <div class="col-title"><i class='bx bx-line-chart'></i> Technical</div>
+                        <div class="stat-row"><span class="stat-label">RSI</span> <span class="stat-val ${technical.rsi > 70 || technical.rsi < 30 ? 'text-warning' : ''}">${technical.rsi}</span></div>
+                        <div class="stat-row"><span class="stat-label">Volume</span> <span class="stat-val">${technical.volume}</span></div>
+                        <div class="stat-row"><span class="stat-label">Sup/Res</span> <span class="stat-val">${technical.support} / ${technical.resistance}</span></div>
+                    </div>
+
+                    <div class="analysis-col">
+                        <div class="col-title"><i class='bx bx-briefcase'></i> Fundamental</div>
+                        <div class="stat-row"><span class="stat-label">PBV</span> <span class="stat-val">${fundamental.pbv}</span></div>
+                        <div class="stat-row"><span class="stat-label">PER</span> <span class="stat-val">${fundamental.per}</span></div>
+                        <div class="stat-row"><span class="stat-label">ROE</span> <span class="stat-val text-success">${fundamental.roe}</span></div>
+                    </div>
+                </div>
+
+                <div class="ai-insight-box inline-box">
+                     <h3><i class='bx bx-brain'></i> AI Insight</h3>
+                     <p class="ai-reason">"${item.sentiment.reason}"</p>
+                </div>
+
+                <div class="news-footer">
+                    <div class="left-badges">
+                        <span class="sentiment-badge ${badgeClass}">${item.sentiment.action}</span>
+                        <span class="horizon-tag ${horizonClass}"><i class='bx ${horizon.icon}'></i> ${horizon.label}</span>
+                    </div>
+                </div>
+                
+                <a href="${item.link}" target="_blank" class="read-more-link">
+                    Read Source <i class='bx bx-link-external'></i>
+                </a>
             </div>
         </article>
         `;
     }).join('');
 }
-
-function renderTicker(newsList) {
-    const items = newsList.slice(0, 30).map(n =>
-        `<span class="ticker-item"><strong>${n.sentiment.action}</strong> ${n.title}</span>`
-    ).join(' • ');
-    tickerEl.innerHTML = items + ' • ' + items;
-}
-
-function updateSidebar(newsList) {
-    const buys = newsList.filter(n => n.sentiment.score > 0).slice(0, 5);
-    const sells = newsList.filter(n => n.sentiment.score < 0).slice(0, 5);
-    renderMiniList('top-buy-list', buys, 'text-success');
-    renderMiniList('top-sell-list', sells, 'text-danger');
-}
-
-function renderMiniList(elementId, items, colorClass) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    if (items.length === 0) {
-        el.innerHTML = '<div class="text-muted" style="font-size: 12px;">No signals detected.</div>';
-        return;
-    }
-    el.innerHTML = items.map(item => `
-        <div class="mini-item">
-            <a href="#" onclick="openAnalysis('${encodeURIComponent(item.title).replace(/'/g, "%27")}', event)">${item.title}</a>
-            <div class="mini-meta">
-                <span>${item.source}</span>
-                <span class="${colorClass}" style="font-weight:700;">${item.sentiment.action}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Modal Logic Enhanced
-window.openAnalysis = function (encodedTitle, event) {
-    if (event) event.preventDefault();
-    const title = decodeURIComponent(encodedTitle);
-    const news = allNewsData.find(n => n.title === title);
-    if (!news) return;
-
-    // Lookup Stock Info for Ownership
-    const stockInfo = Data.lookupStock(news.title) ||
-        Data.lookupStock(news.code) ||
-        { owner: 'Data Not Available' };
-
-    document.getElementById('modal-title').innerText = news.title;
-    document.getElementById('modal-date').innerText = `Updated: ${formatDateID(news.date)} • Source: ${news.source}`;
-
-    // Clear previous content first to prevent duplication or rendering issue
-    const bodyContainer = document.querySelector('.modal-body');
-    bodyContainer.innerHTML = '';
-
-    const technical = news.sentiment.technical || {};
-    const fundamental = news.sentiment.fundamental || {};
-
-    bodyContainer.innerHTML = `
-        <div class="owner-banner">
-            <i class='bx bx-id-card'></i> <strong>PEMEGANG SAHAM UTAMA:</strong> ${stockInfo.owner}
-        </div>
-
-        <p class="modal-summary">${news.summary}</p>
-        
-        <div class="analysis-grid">
-            <div class="analysis-col">
-                <div class="col-title"><i class='bx bx-line-chart'></i> Technical (AI Estimated)</div>
-                <div class="stat-row"><span class="stat-label">RSI (14)</span> <span class="stat-val ${technical.rsi > 70 || technical.rsi < 30 ? 'text-warning' : ''}">${technical.rsi}</span></div>
-                <div class="stat-row"><span class="stat-label">MA Trend</span> <span class="stat-val">${technical.ma20}</span></div>
-                <div class="stat-row"><span class="stat-label">Volume</span> <span class="stat-val">${technical.volume}</span></div>
-                <div class="stat-row"><span class="stat-label">Support</span> <span class="stat-val">${technical.support}</span></div>
-                <div class="stat-row"><span class="stat-label">Resistance</span> <span class="stat-val">${technical.resistance}</span></div>
-            </div>
-
-            <div class="analysis-col">
-                <div class="col-title"><i class='bx bx-briefcase'></i> Fundamental Snapshot</div>
-                <div class="stat-row"><span class="stat-label">PBV Ratio</span> <span class="stat-val">${fundamental.pbv}</span></div>
-                <div class="stat-row"><span class="stat-label">PER</span> <span class="stat-val">${fundamental.per}</span></div>
-                <div class="stat-row"><span class="stat-label">ROE</span> <span class="stat-val text-success">${fundamental.roe}</span></div>
-                <div class="stat-row"><span class="stat-label">DER</span> <span class="stat-val">${fundamental.der}</span></div>
-            </div>
-        </div>
-
-        </div>
-
-        <!-- TRADINGVIEW WIDGET INTEGRATION -->
-        <div class="tv-widget-container" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-            <div class="col-title" style="margin-bottom:15px;"><i class='bx bx-radar'></i> Live Technical Meter (TradingView)</div>
-            <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget" id="tv-widget-${news.code || 'COMPOSITE'}"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
-                {
-                "interval": "1D",
-                "width": "100%",
-                "isTransparent": true,
-                "height": 400,
-                "symbol": "IDX:${news.code ? news.code : 'COMPOSITE'}",
-                "showIntervalTabs": true,
-                "displayMode": "single",
-                "locale": "id"
-                }
-                </script>
-            </div>
-            <small style="color:var(--text-muted); font-size:10px;">*Data real-time dari TradingView (Delay 15m without Pro).</small>
-        </div>
-
-        <div class="ai-insight-box" style="margin-top:20px;">
-             <h3><i class='bx bx-brain'></i> AI Prediction</h3>
-             <p class="ai-reason">"${news.sentiment.reason}"</p>
-        </div>
-
-        <a href="${news.link}" target="_blank" class="read-more-btn">
-            Read Full Article Source <i class='bx bx-link-external'></i>
-        </a>
-    `;
-
-    // Manually Inject Script because innerHTML script tags don't execute
-    const tvScript = document.createElement('script');
-    tvScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-    tvScript.async = true;
-    tvScript.innerHTML = JSON.stringify({
-        "interval": "1D",
-        "width": "100%",
-        "isTransparent": true,
-        "height": 400,
-        "symbol": `IDX:${news.code ? news.code : 'COMPOSITE'}`,
-        "showIntervalTabs": true,
-        "displayMode": "single",
-        "locale": "id",
-        "colorTheme": "dark"
-    });
-
-    // Find the container we just made
-    setTimeout(() => {
-        const widgetContainer = bodyContainer.querySelector('.tradingview-widget-container__widget');
-        if (widgetContainer) {
-            widgetContainer.parentNode.appendChild(tvScript);
-        }
-    }, 50);
-
-    const badge = document.getElementById('modal-sentiment-badge');
-    badge.innerText = news.sentiment.action;
-    badge.className = 'modal-badge';
-    if (news.sentiment.signal === 'BULLISH') {
-        badge.style.background = 'var(--success)';
-        badge.style.color = '#000';
-    } else if (news.sentiment.signal === 'BEARISH') {
-        badge.style.background = 'var(--danger)';
-        badge.style.color = '#fff';
-    } else {
-        badge.style.background = 'var(--warning)';
-        badge.style.color = '#000';
-    }
-
-    // Force style reset
-    modal.style.display = 'flex';
-    modal.style.opacity = '0'; // Start transparent
-
-    // Use timeout to ensure DOM render before transition
-    setTimeout(() => {
-        modal.style.opacity = '1';
-    }, 10);
-};
-
-window.closeModal = function () {
-    modal.style.opacity = '0';
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
-};
 
 function formatDateID(date) {
     const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
