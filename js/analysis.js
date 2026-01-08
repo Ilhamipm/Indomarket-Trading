@@ -178,6 +178,13 @@ StockApp.Analysis = {
                     }
                 }
 
+                // Generate Advice based on action
+                let advice = "Wait for market confirmation.";
+                if (action === 'STRONG BUY') advice = "Potensi breakout. Beli saat open market.";
+                else if (action === 'BUY') advice = "Akumulasi bertahap. Buy on Weakness.";
+                else if (action === 'SELL') advice = "Amankan profit segera. Jual sebagian.";
+                else if (action === 'STRONG SELL') advice = "Trend bearish kuat. Hindari entry.";
+
                 return {
                     code: stock.code,
                     action: action,
@@ -186,6 +193,7 @@ StockApp.Analysis = {
                     entry: entry, // Can be '_' if no price
                     tp: tp,
                     sl: sl,
+                    advice: advice, // New Advice Field
                     reason: `Accumulated Sentiment: ${stock.score > 0 ? '+' : ''}${stock.score} from ${stock.mentions} sources.`
                 };
             }).filter(s => s !== null);

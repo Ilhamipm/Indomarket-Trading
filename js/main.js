@@ -90,6 +90,7 @@ function generateTradingRobot(newsList) {
                     <span class="text-danger">SL</span> <strong>${sig.sl}</strong>
                 </div>
             </div>
+            <div class="robot-advice"><i class='bx bx-bulb'></i> ${sig.advice}</div>
         </div>
     `).join('');
 }

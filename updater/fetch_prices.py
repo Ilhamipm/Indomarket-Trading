@@ -126,6 +126,48 @@ def update_prices():
 
     print(f"Successfully updated news with {len(news_list)} articles.")
 
+    # 3. History Tracking
+    print("Updating History...")
+    history_dir = os.path.join(base_dir, '..', 'data')
+    os.makedirs(history_dir, exist_ok=True)
+
+    today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    # --- Price History ---
+    price_hist_path = os.path.join(history_dir, 'price_history.json')
+    price_history = {}
+    
+    if os.path.exists(price_hist_path):
+        try:
+            with open(price_hist_path, 'r') as f:
+                price_history = json.load(f)
+        except: pass
+    
+    # Append today's prices
+    price_history[today_date] = data_to_save
+    
+    with open(price_hist_path, 'w') as f:
+        json.dump(price_history, f, indent=4)
+
+    # --- News History ---
+    news_hist_path = os.path.join(history_dir, 'news_history.json')
+    news_history = {}
+
+    if os.path.exists(news_hist_path):
+        try:
+            with open(news_hist_path, 'r') as f:
+                news_history = json.load(f)
+        except: pass
+
+    # Append today's news
+    news_history[today_date] = news_list
+
+    with open(news_hist_path, 'w') as f:
+        json.dump(news_history, f, indent=4)
+
+    print(f"History updated for {today_date}")
+
+
 
 if __name__ == "__main__":
     update_prices()
