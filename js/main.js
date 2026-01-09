@@ -155,7 +155,8 @@ function generateWatchlist(newsList) {
             if (match) code = match[0];
         }
 
-        if (code) {
+        // FILTER: Exclude IHSG/Composite from Watchlist
+        if (code && code !== 'IHSG' && code !== 'COMPOSITE' && code !== 'IDX') {
             if (!scores[code]) scores[code] = { code, score: 0, title: n.title, sector: n.sector };
             scores[code].score += n.sentiment.score;
             if (new Date(n.date) > new Date()) scores[code].title = n.title;
@@ -258,15 +259,19 @@ function renderFeed(newsList) {
 }
 
 function renderTicker(newsList) {
+    // Simplified Ticker: No labels, just title
     const items = newsList.slice(0, 30).map(n =>
-        `<span class="ticker-item"><strong>${n.sentiment.action}</strong> ${n.title}</span>`
+        `<span class="ticker-item">${n.title}</span>`
     ).join(' • ');
     tickerEl.innerHTML = items + ' • ' + items;
 }
 
 function updateSidebar(newsList) {
-    const buys = newsList.filter(n => n.sentiment.score > 0).slice(0, 5);
-    const sells = newsList.filter(n => n.sentiment.score < 0).slice(0, 5);
+    // FILTER: Exclude IHSG from Top Buy/Sell Lists
+    const filteredList = newsList.filter(n => n.code !== 'IHSG' && n.code !== 'COMPOSITE' && n.code !== 'IDX');
+
+    const buys = filteredList.filter(n => n.sentiment.score > 0).slice(0, 5);
+    const sells = filteredList.filter(n => n.sentiment.score < 0).slice(0, 5);
     renderMiniList('top-buy-list', buys, 'text-success');
     renderMiniList('top-sell-list', sells, 'text-danger');
 }
