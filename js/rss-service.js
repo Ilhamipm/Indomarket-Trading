@@ -12,6 +12,9 @@ class RssService {
         if (this.feeds.length === 0) {
             this.addFeed('https://www.antaranews.com/rss/ekonomi-bisnis');
             this.addFeed('https://www.cnbcindonesia.com/market/rss');
+            // Added per user request - Will be handled by Web Scraper
+            this.addFeed('https://id.tradingview.com/markets/stocks-indonesia/');
+            this.addFeed('https://www.idx.co.id/id/data-pasar/ringkasan-perdagangan/ringkasan-indeks');
         }
     }
 
