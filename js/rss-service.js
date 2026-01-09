@@ -169,15 +169,50 @@ class RssService {
             items.forEach(i => unique.set(i.link, i));
 
             // Limit to 10 items
-            const result = Array.from(unique.values()).slice(0, 10);
-            console.log(`[RSS] Scraped ${result.length} items from ${url}`);
+            let result = Array.from(unique.values());
 
-            return result.map(item => this.normalizeItem(item, { title: 'Web Scrape: ' + new URL(url).hostname }));
+            // FILTER: Ensure Indonesian Context (Stock Codes or Market Keywords)
+            result = result.filter(item => this.isIndonesianMarketNews(item.title, item.description));
+
+            console.log(`[RSS] Scraped ${result.length} relevant items from ${url}`);
+
+            return result.slice(0, 10).map(item => this.normalizeItem(item, { title: 'Web Scrape: ' + new URL(url).hostname }));
 
         } catch (e) {
             console.error("[RSS] Scraping failed:", e);
             return [];
         }
+    }
+
+    /**
+     * Check if text relates to Indonesian Market
+     */
+    isIndonesianMarketNews(title, summary) {
+        const text = (title + ' ' + summary).toUpperCase();
+
+        // 1. Check Specific Stock Codes from App Database
+        const stockCodes = window.STOCK_DATA ? Object.keys(window.STOCK_DATA) : [];
+
+        const hasCode = stockCodes.some(code => {
+            return text.includes(` ${code} `) ||
+                text.includes(`(${code})`) ||
+                text.includes(`${code}:`) ||
+                text.startsWith(`${code} `);
+        });
+
+        if (hasCode) return true;
+
+        // 2. Check General Indonesian Market Keywords
+        const keywords = [
+            'IHSG', 'IDX', 'SAHAM', 'BURSA', 'BEI', 'JCI', // Market Indices/Terms
+            'EMITEN', 'DIVIDEN', 'IPO', 'INVESTOR', // Corp Actions
+            'RUPIAH', 'IDR', // Currency
+            'REKSA DANA', 'OBLIGASI', 'SUKUK', // Instruments
+            'TRILIUN', 'MILIAR', // Money formatting often used in ID news
+            'PERBANKAN', 'TAMBANG', 'BATUBARA' // Sectors
+        ];
+
+        return keywords.some(k => text.includes(k));
     }
 
     resolveUrl(path, base) {
