@@ -12,6 +12,9 @@
 
     <!-- Icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <!-- MQTT.js (Public Cloud Chat) -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 </head>
 
 <body>
@@ -40,34 +43,40 @@
             </div>
         </div>
 
-        <!-- Search / Filter -->
-        <div class="search-bar-container">
-            <div class="search-wrapper">
-                <i class='bx bx-search'></i>
-                <input type="text" id="search-input" placeholder="Search Ticker (e.g., ADRO, BSDE)...">
+        <!-- Search / Filter (Compact Row) -->
+        <div class="search-bar-container"
+            style="flex-direction: row; align-items: center; justify-content: space-between; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                <!-- Online Status -->
+                <div class="online-status-badge"
+                    style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 6px 14px; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                    <span class="pulsing-dot" style="margin:0;"></span>
+                    <span id="online-count" style="font-size: 13px; font-weight: 700; color: var(--success);">1
+                        Online</span>
+                </div>
+
+                <!-- Compact Search -->
+                <div class="search-wrapper" style="padding: 8px 15px; border-radius: 20px; max-width: 400px; flex: 1;">
+                    <i class='bx bx-search' style="font-size: 16px; color: var(--text-muted);"></i>
+                    <input type="text" id="search-input" placeholder="Search ticker..." style="font-size: 13px;">
+                </div>
             </div>
 
-            <!-- Category Filters -->
-            <div class="filter-wrapper">
-                <button class="filter-btn active" onclick="filterSource('all')">All Market</button>
-                <button class="filter-btn text-warning" onclick="filterSource('1H')"
-                    style="border-color: var(--warning);"><i class='bx bx-timer'></i> 1 Jam Terakhir</button>
+            <!-- Category Filters (Horizontal Scroll) -->
+            <div class="filter-wrapper"
+                style="flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0; mask-image: linear-gradient(to left, transparent, black 10%);">
+                <button class="filter-btn active" onclick="filterSource('all')">All</button>
+                <button class="filter-btn text-warning" onclick="filterSource('1H')"><i class='bx bx-timer'></i>
+                    1H</button>
 
-                <div class="filter-group-label"><i class='bx bx-coin-stack'></i> BANKING:</div>
-                <button class="filter-btn" onclick="filterSource('Banking')">Banks</button>
-
-                <div class="filter-group-label"><i class='bx bx-hard-hat'></i> MINING:</div>
+                <div class="filter-group-label" style="font-size: 10px;">SECTOR:</div>
+                <button class="filter-btn" onclick="filterSource('Banking')">Bank</button>
                 <button class="filter-btn" onclick="filterSource('Mining-Coal')">Coal</button>
                 <button class="filter-btn" onclick="filterSource('Mining-Gold')">Gold</button>
                 <button class="filter-btn" onclick="filterSource('Mining-Nickel')">Nickel</button>
-
-                <div class="filter-group-label"><i class='bx bx-buildings'></i> SECTORS:</div>
-                <button class="filter-btn" onclick="filterSource('Property')">Property</button>
-                <button class="filter-btn" onclick="filterSource('Consumer')">Consumer</button>
-
-                <div class="filter-group-label"><i class='bx bx-rocket'></i> HOT:</div>
+                <button class="filter-btn" onclick="filterSource('Property')">Prop</button>
+                <button class="filter-btn" onclick="filterSource('Consumer')">Cons</button>
                 <button class="filter-btn" onclick="filterSource('IPO')">IPO</button>
-                <button class="filter-btn" onclick="filterSource('Small Cap')">Small Cap</button>
             </div>
         </div>
 
@@ -184,7 +193,32 @@
         </div>
     </div>
 
+    <!-- Floating Chat Widget -->
+    <div id="chat-widget" class="chat-widget collapsed">
+
+        <!-- Chat Header (Click to Toggle) -->
+        <div class="chat-header" onclick="toggleChat()">
+            <div class="chat-title">
+                <i class='bx bx-message-rounded-dots'></i> Live Chat
+                <span class="chat-online-count" id="chat-online-count">(1)</span>
+            </div>
+            <i class='bx bx-chevron-up' id="chat-toggle-icon"></i>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="chat-body">
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-system-msg">Welcome to IndoMarket Live Chat!</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type a message..." maxlength="100">
+                <button id="chat-send-btn"><i class='bx bx-send'></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <script src="js/chat-service.js"></script>
     <script src="js/news_data.js"></script>
     <script src="js/stock_data.js"></script>
     <script src="js/rss-service.js"></script>
