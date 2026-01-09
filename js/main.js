@@ -38,10 +38,18 @@ async function init() {
 
 async function loadData() {
     if (allNewsData.length === 0) {
-        newsContainer.innerHTML = `<div class="loading-state"><i class='bx bx-loader-alt bx-spin'></i> Fetching Live Updates...</div>`;
+        newsContainer.innerHTML = `<div class="loading-state"><i class='bx bx-loader-alt bx-spin'></i> Fetching Live Updates & RSS Feeds...</div>`;
     }
 
-    allNewsData = await Data.fetchAllNews();
+    // 1. Fetch Local Data
+    const localNews = await Data.fetchAllNews();
+
+    // 2. Fetch RSS Feeds
+    const rssNews = await window.RssService.fetchAllFeeds();
+
+    // 3. Merge & Sort (Newest first)
+    // Convert date strings to Objects for sort, if string
+    allNewsData = [...localNews, ...rssNews].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     // Analyze all
     allNewsData = allNewsData.map(n => ({
@@ -237,6 +245,58 @@ function renderMiniList(elementId, items, colorClass) {
                 <span>${item.source}</span>
                 <span class="${colorClass}" style="font-weight:700;">${item.sentiment.action}</span>
             </div>
+        </div>
+    `).join('');
+}
+
+// RSS Modal Logic
+const rssModal = document.getElementById('rss-modal');
+const rssInput = document.getElementById('rss-input');
+const rssListEl = document.getElementById('rss-feed-list');
+
+window.openRssModal = function () {
+    renderRssList();
+    rssModal.style.display = 'flex';
+    setTimeout(() => rssModal.style.opacity = '1', 10);
+};
+
+window.closeRssModal = function () {
+    rssModal.style.opacity = '0';
+    setTimeout(() => rssModal.style.display = 'none', 300);
+};
+
+window.addRssFeed = function () {
+    const url = rssInput.value.trim();
+    if (!url) return alert("Enter a valid URL");
+
+    if (window.RssService.addFeed(url)) {
+        rssInput.value = '';
+        renderRssList();
+        // Trigger a reload to fetch new data
+        loadData();
+    } else {
+        alert("Feed already exists!");
+    }
+};
+
+window.removeRssFeed = function (url) {
+    if (confirm(`Remove feed: ${url}?`)) {
+        window.RssService.removeFeed(url);
+        renderRssList();
+        loadData(); // Reload
+    }
+};
+
+function renderRssList() {
+    const feeds = window.RssService.feeds;
+    if (feeds.length === 0) {
+        rssListEl.innerHTML = '<div class="text-muted">No custom feeds added.</div>';
+        return;
+    }
+    rssListEl.innerHTML = feeds.map(url => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#333; padding:8px; border-radius:4px;">
+            <div style="font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:350px;">${url}</div>
+            <button onclick="removeRssFeed('${url}')" style="background:none; border:none; color:var(--danger); cursor:pointer;"><i class='bx bx-trash'></i></button>
         </div>
     `).join('');
 }

@@ -23,6 +23,9 @@
                 <h1><i class='bx bx-news'></i> INDOMARKET <span class="text-primary">AI NEWS</span></h1>
             </div>
             <div class="status-bar">
+                <div class="status-item clickable" onclick="openRssModal()"
+                    style="cursor: pointer; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px;"><i
+                        class='bx bx-rss'></i> Manage RSS</div>
                 <div class="status-item"><i class='bx bx-broadcast'></i> LIVE FEED</div>
                 <div class="status-item text-primary"><i class='bx bx-refresh'></i> Auto-Update: 5 Mins</div>
                 <div class="status-item"><i class='bx bx-time'></i> <span id="clock" class="font-mono">--:--:--</span>
@@ -125,6 +128,30 @@
         </div>
     </div>
 
+    <!-- RSS Modal -->
+    <div class="modal-overlay" id="rss-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Manage RSS Feeds</h2>
+                <button class="close-btn" onclick="closeRssModal()"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.9em; color: #ccc; margin-bottom: 10px;">Add URLs to trusted RSS feeds (e.g.,
+                    CNBC, CNN, Antara). The robot will read these for signals.</p>
+                <div class="input-group" style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="rss-input" placeholder="https://example.com/rss..."
+                        style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white;">
+                    <button onclick="addRssFeed()" class="filter-btn active" style="padding: 0 20px;">Add</button>
+                </div>
+                <div class="filter-group-label">YOUR FEEDS:</div>
+                <div id="rss-feed-list"
+                    style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; margin-top: 10px;">
+                    <!-- Feeds List -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Analysis Modal -->
     <div class="modal-overlay" id="analysis-modal">
         <div class="modal-content news-modal">
@@ -157,6 +184,7 @@
     <!-- Scripts -->
     <script src="js/news_data.js"></script>
     <script src="js/stock_data.js"></script>
+    <script src="js/rss-service.js"></script>
     <script src="js/data-service.js"></script>
     <script src="js/analysis.js"></script>
     <script src="js/main.js"></script>
