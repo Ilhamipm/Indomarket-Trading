@@ -136,10 +136,11 @@
                 <button class="close-btn" onclick="closeRssModal()"><i class='bx bx-x'></i></button>
             </div>
             <div class="modal-body">
-                <p style="font-size: 0.9em; color: #ccc; margin-bottom: 10px;">Add URLs to trusted RSS feeds (e.g.,
-                    CNBC, CNN, Antara). The robot will read these for signals.</p>
+                <p style="font-size: 0.9em; color: #ccc; margin-bottom: 10px;">Add any <strong>RSS Feed URL</strong> or
+                    even a standard <strong>Web Page URL</strong> (e.g., Detik, CNBC). The system will try to scrape
+                    news automatically.</p>
                 <div class="input-group" style="display:flex; gap:10px; margin-bottom:20px;">
-                    <input type="text" id="rss-input" placeholder="https://example.com/rss..."
+                    <input type="text" id="rss-input" placeholder="https://example.com/news..."
                         style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white;">
                     <button onclick="addRssFeed()" class="filter-btn active" style="padding: 0 20px;">Add</button>
                 </div>

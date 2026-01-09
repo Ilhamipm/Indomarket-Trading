@@ -72,24 +72,120 @@ class RssService {
     }
 
     /**
-     * Fetch a single feed
+     * Fetch a single feed (RSS Loopup -> Fallback to Web Scrape)
      */
     async fetchFeed(url) {
         try {
-            // Using a public proxy to convert RSS XML to JSON and handle CORS
-            const response = await fetch(`${this.API_BASE}${encodeURIComponent(url)}`);
+            // 1. Try Standard RSS via rss2json
+            const rssUrl = `${this.API_BASE}${encodeURIComponent(url)}`;
+            const response = await fetch(rssUrl);
             const data = await response.json();
 
             if (data.status === 'ok') {
                 return data.items.map(item => this.normalizeItem(item, data.feed));
             } else {
-                console.warn(`[RSS] Failed to fetch ${url}:`, data.message);
-                return [];
+                // 2. Fallback: Try Client-Side Scraping
+                console.log(`[RSS] RSS fetch failed for ${url}, trying Web Scraper...`);
+                return await this.fetchAndScrape(url);
             }
         } catch (error) {
             console.error(`[RSS] Network error for ${url}:`, error);
+            // Even on network error (maybe strict CORS on rss2json?), try scraping
+            return await this.fetchAndScrape(url);
+        }
+    }
+
+    /**
+     * Scrape generic webpage for news items
+     */
+    async fetchAndScrape(url) {
+        try {
+            // Use AllOrigins as CORS Proxy
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const res = await fetch(proxyUrl);
+            const json = await res.json();
+
+            if (!json.contents) return [];
+
+            // Parse HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(json.contents, 'text/html');
+            const baseUrl = new URL(url).origin;
+
+            // Heuristic Parsing
+            let items = [];
+
+            // Key scraping strategies
+            const strategies = [
+                'article',
+                '.post',
+                '.news-item',
+                '.card',
+                '.entry-title',
+                '.headline'
+            ];
+
+            // 1. Try Finding Semantic Content
+            for (let selector of strategies) {
+                const nodes = doc.querySelectorAll(selector);
+                if (nodes.length > 0) {
+                    nodes.forEach(node => {
+                        const titleEl = node.querySelector('h1, h2, h3, h4') || node.querySelector('a');
+                        const linkEl = node.querySelector('a') || (node.tagName === 'A' ? node : null);
+                        const sumEl = node.querySelector('p, .summary, .excerpt');
+
+                        // Validation
+                        if (titleEl && linkEl && titleEl.innerText.length > 15) {
+                            items.push({
+                                title: titleEl.innerText.trim(),
+                                link: this.resolveUrl(linkEl.getAttribute('href'), baseUrl),
+                                pubDate: new Date().toISOString(), // Default now
+                                description: sumEl ? sumEl.innerText.substring(0, 200) : ''
+                            });
+                        }
+                    });
+                }
+                if (items.length >= 5) break; // Found enough? stop looking.
+            }
+
+            // 2. Fallback: Find all heavy anchor tags
+            if (items.length === 0) {
+                doc.querySelectorAll('a').forEach(a => {
+                    // Filter navigation links
+                    const text = a.innerText.trim();
+                    if (text.length > 25 && !text.includes('Sign In') && !text.includes('Menu')) {
+                        items.push({
+                            title: text,
+                            link: this.resolveUrl(a.getAttribute('href'), baseUrl),
+                            pubDate: new Date().toISOString(),
+                            description: ''
+                        });
+                    }
+                });
+            }
+
+            // Deduplicate by URL
+            const unique = new Map();
+            items.forEach(i => unique.set(i.link, i));
+
+            // Limit to 10 items
+            const result = Array.from(unique.values()).slice(0, 10);
+            console.log(`[RSS] Scraped ${result.length} items from ${url}`);
+
+            return result.map(item => this.normalizeItem(item, { title: 'Web Scrape: ' + new URL(url).hostname }));
+
+        } catch (e) {
+            console.error("[RSS] Scraping failed:", e);
             return [];
         }
+    }
+
+    resolveUrl(path, base) {
+        if (!path) return '#';
+        if (path.startsWith('http')) return path;
+        // Handle root relative
+        if (path.startsWith('/')) return base + path;
+        return base + '/' + path;
     }
 
     /**
