@@ -91,40 +91,56 @@
             <!-- Sidebar -->
             <aside class="sidebar">
 
-                <!-- Trading Robot Card -->
-                <div class="card robot-card">
-                    <div class="card-title" style="color:var(--primary); display:flex; align-items:center; gap:8px;">
-                        <i class='bx bx-bot'></i> AI TRADING ROBOT
+                <!-- Sidebar -->
+                <aside class="sidebar">
+
+                    <!-- IHSG Market Widget -->
+                    <div class="card ihsg-card"
+                        style="border-left: 4px solid var(--primary); background: linear-gradient(145deg, #1e1e1e, #252525);">
+                        <div class="card-title" style="color:#fff; display:flex; justify-content:space-between;">
+                            <span><i class='bx bx-bar-chart-alt-2'></i> IHSG (Composite)</span>
+                            <span id="ihsg-movement" class="text-success" style="font-size:0.9em;">+0.00%</span>
+                        </div>
+                        <h2 id="ihsg-price" style="font-size:24px; margin:10px 0; color:#fff;">7,200.50</h2>
+                        <p id="ihsg-summary" style="font-size:11px; color:#aaa; line-height:1.4;">Market data loading...
+                        </p>
                     </div>
-                    <div id="trading-robot-list" class="robot-grid">
-                        <!-- Injected via JS -->
+
+                    <!-- Trading Robot Card -->
+                    <div class="card robot-card">
+                        <div class="card-title"
+                            style="color:var(--primary); display:flex; align-items:center; gap:8px;">
+                            <i class='bx bx-bot'></i> AI TRADING ROBOT
+                        </div>
+                        <div id="trading-robot-list" class="robot-grid">
+                            <!-- Injected via JS -->
+                        </div>
+                        <small
+                            style="display:block; margin-top:10px; color:var(--text-muted); font-size:10px; text-align:center;">
+                            *Prediction for Tomorrow's Market Open
+                        </small>
                     </div>
-                    <small
-                        style="display:block; margin-top:10px; color:var(--text-muted); font-size:10px; text-align:center;">
-                        *Prediction for Tomorrow's Market Open
-                    </small>
-                </div>
 
-                <!-- Expanded Watchlist -->
-                <div class="card watchlist-card">
-                    <div class="card-title text-success"><i class='bx bx-line-chart'></i> WATCHLIST BESOK</div>
-                    <div id="tomorrow-watchlist" class="watchlist-grid">
-                        <!-- Injected via JS -->
+                    <!-- Expanded Watchlist -->
+                    <div class="card watchlist-card">
+                        <div class="card-title text-success"><i class='bx bx-line-chart'></i> WATCHLIST BESOK</div>
+                        <div id="tomorrow-watchlist" class="watchlist-grid">
+                            <!-- Injected via JS -->
+                        </div>
                     </div>
-                </div>
 
-                <!-- Removed Sentiment Gauge as requested -->
+                    <!-- Removed Sentiment Gauge as requested -->
 
-                <div class="card">
-                    <div class="card-title">Top 🔔 BUY Signals</div>
-                    <div id="top-buy-list" class="mini-list"></div>
-                </div>
+                    <div class="card">
+                        <div class="card-title">Top 🔔 BUY Signals</div>
+                        <div id="top-buy-list" class="mini-list"></div>
+                    </div>
 
-                <div class="card">
-                    <div class="card-title">Top ⚠️ SELL Signals</div>
-                    <div id="top-sell-list" class="mini-list"></div>
-                </div>
-            </aside>
+                    <div class="card">
+                        <div class="card-title">Top ⚠️ SELL Signals</div>
+                        <div id="top-sell-list" class="mini-list"></div>
+                    </div>
+                </aside>
         </div>
     </div>
 

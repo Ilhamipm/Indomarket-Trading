@@ -62,13 +62,53 @@ async function loadData() {
         renderFeed(allNewsData);
     }
     updateSidebar(allNewsData);
+    updateIHSGWidget(allNewsData); // NEW: Update IHSG Widget
     renderTicker(allNewsData);
     generateWatchlist(allNewsData);
     generateTradingRobot(allNewsData);
 }
 
+// NEW: IHSG Widget Logic
+function updateIHSGWidget(newsList) {
+    const ihsgNews = newsList.filter(n => n.code === 'IHSG');
+    const widgetPrice = document.getElementById('ihsg-price');
+    const widgetMove = document.getElementById('ihsg-movement');
+    const widgetSum = document.getElementById('ihsg-summary');
+
+    if (!widgetPrice) return;
+
+    // Calculate Sentiment for IHSG
+    let score = 0;
+    ihsgNews.forEach(n => score += n.sentiment.score);
+
+    // Mock Price Data (Ideally this comes from Data Service if available)
+    // For now we simulate movement based on news sentiment
+    // In a real app, window.STOCK_DATA['IHSG'] would typically hold this.
+    // We'll keep the static price 7,200 for demo but update the %
+    let movePercent = (Math.random() * 0.5) * (score >= 0 ? 1 : -1);
+
+    if (score !== 0) {
+        movePercent = (score * 0.1) + (Math.random() * 0.1);
+    }
+
+    // Update UI
+    widgetMove.innerText = `${movePercent > 0 ? '+' : ''}${movePercent.toFixed(2)}%`;
+    widgetMove.className = movePercent >= 0 ? 'text-success' : 'text-danger';
+
+    if (ihsgNews.length > 0) {
+        // Show latest title
+        widgetSum.innerText = ihsgNews[0].title;
+    } else {
+        widgetSum.innerText = "Menunggu berita pasar terkini...";
+    }
+}
+
 function generateTradingRobot(newsList) {
-    const robotSignals = Analysis.TradingRobot.analyzeOpportunities(newsList);
+    // FILTER: Exclude IHSG/Composite from Trading Signals
+    // The user wants strict stock signals only.
+    const robotSignals = Analysis.TradingRobot.analyzeOpportunities(newsList)
+        .filter(sig => sig.code !== 'IHSG' && sig.code !== 'COMPOSITE' && sig.code !== 'IDX');
+
     const container = document.getElementById('trading-robot-list');
 
     if (!container) return;

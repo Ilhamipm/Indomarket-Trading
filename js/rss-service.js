@@ -202,17 +202,11 @@ class RssService {
 
         if (hasCode) return true;
 
-        // 2. Check General Indonesian Market Keywords
-        const keywords = [
-            'IHSG', 'IDX', 'SAHAM', 'BURSA', 'BEI', 'JCI', // Market Indices/Terms
-            'EMITEN', 'DIVIDEN', 'IPO', 'INVESTOR', // Corp Actions
-            'RUPIAH', 'IDR', // Currency
-            'REKSA DANA', 'OBLIGASI', 'SUKUK', // Instruments
-            'TRILIUN', 'MILIAR', // Money formatting often used in ID news
-            'PERBANKAN', 'TAMBANG', 'BATUBARA' // Sectors
-        ];
+        // 2. Strict Market Index Keywords (IHSG Only)
+        // We only allow IHSG-related news if it's not a stock specific news
+        const indices = ['IHSG', 'JCI', 'IDX COMPOSITE', 'COMPOSITE INDEX'];
 
-        return keywords.some(k => text.includes(k));
+        return indices.some(k => text.includes(k));
     }
 
     resolveUrl(path, base) {
@@ -227,19 +221,42 @@ class RssService {
      * Convert RSS item to App News Format
      */
     normalizeItem(item, feedInfo) {
-        // Try to infer stock code from title
-        const codeMatch = item.title.match(/\b[A-Z]{4}\b/);
-        const code = codeMatch ? codeMatch[0] : null;
+        const title = item.title;
+        const summary = this.stripHtml(item.description || item.content);
+        // Combine for search
+        const text = (title + ' ' + summary).toUpperCase();
+
+        // 1. Infer Stock Code
+        let code = null;
+        const stockCodes = window.STOCK_DATA ? Object.keys(window.STOCK_DATA) : [];
+
+        // Priority: Match known stock code
+        const matchedCode = stockCodes.find(c => {
+            return text.includes(` ${c} `) || text.includes(`(${c})`) || text.includes(`${c}:`) || text.startsWith(`${c} `);
+        });
+
+        if (matchedCode) {
+            code = matchedCode;
+        } else {
+            // Check for IHSG explicitly
+            if (text.includes('IHSG') || text.includes('JCI') || text.includes('COMPOSITE')) {
+                code = 'IHSG';
+            } else {
+                // Regex fallback for other tickers (maybe dynamic)
+                const codeMatch = title.match(/\b[A-Z]{4}\b/);
+                code = codeMatch ? codeMatch[0] : null;
+            }
+        }
 
         return {
             source: feedInfo.title || 'RSS Feed',
             title: item.title,
             link: item.link,
-            date: item.pubDate, // RSS usually has pubDate
-            summary: this.stripHtml(item.description || item.content),
+            date: item.pubDate,
+            summary: summary,
             code: code,
-            sector: 'General', // Default
-            isRss: true // Flag to distinguish
+            sector: 'General',
+            isRss: true
         };
     }
 
